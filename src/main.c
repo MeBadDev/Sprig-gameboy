@@ -34,7 +34,7 @@
  *   MISO=GP16, MOSI=GP19, SCK=GP18, SD_CS=GP21
  *
  * Audio MAX98357A I2S:
- *   BCLK=GP0, LRC=GP1, DIN=GP2
+ *   BCLK=GP10, LRC=GP11, DIN=GP9
  */
 
 // ---------------------------------------------------------------------------
@@ -729,8 +729,8 @@ int main(void)
 	i2s_config_t i2s_config    = i2s_get_default_config();
 	i2s_config.sample_freq      = AUDIO_SAMPLE_RATE;
 	i2s_config.dma_trans_count  = AUDIO_SAMPLES;
-	i2s_config.data_pin         = 2;    // Sprig: MAX98357A DIN=GP2
-	i2s_config.clock_pin_base   = 0;    // Sprig: BCLK=GP0, LRC=GP1
+	i2s_config.data_pin         = 9;
+	i2s_config.clock_pin_base   = 10;
 	i2s_volume(&i2s_config, 2);
 	i2s_init(&i2s_config);
 	putstdio("AUDIO ");
