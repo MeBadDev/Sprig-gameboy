@@ -4,9 +4,9 @@
 #define ENABLE_LCD    1
 #define ENABLE_SOUND  1
 #define ENABLE_SDCARD 1
-#define PEANUT_GB_HIGH_LCD_ACCURACY 1
+#define PEANUT_GB_HIGH_LCD_ACCURACY 0
 #define PEANUT_GB_USE_BIOS 0
-#define USE_DMA 0
+#define USE_DMA 1
 
 #define VSYNC_REDUCTION_FACTOR 16u
 #define SCREEN_REFRESH_CYCLES_REDUCED (SCREEN_REFRESH_CYCLES / VSYNC_REDUCTION_FACTOR)
@@ -112,12 +112,14 @@ static inline void st7735_set_row_window(uint8_t row)
  */
 static inline void st7735_write_line(const uint16_t *pixels, uint16_t count)
 {
+	static uint8_t linebuf[LCD_WIDTH * 2];
+
 	for (uint16_t i = 0; i < count; i++) {
-		uint8_t hi = (uint8_t)(pixels[i] >> 8);
-		uint8_t lo = (uint8_t)(pixels[i] & 0xFF);
-		spi_write_blocking(SPI_TFT_PORT, &hi, 1);
-		spi_write_blocking(SPI_TFT_PORT, &lo, 1);
+		linebuf[i * 2 + 0] = (uint8_t)(pixels[i] >> 8);
+		linebuf[i * 2 + 1] = (uint8_t)(pixels[i] & 0xFF);
 	}
+
+	spi_write_blocking(SPI_TFT_PORT, linebuf, count * 2);
 	tft_cs_high();
 }
 
@@ -279,6 +281,7 @@ static void draw_selector_row(uint8_t row, const char *name, bool selected)
 	const uint8_t y = (uint8_t)(row * MENU_ROW_HEIGHT);
 	const uint16_t bg = selected ? ST7735_RED : ST7735_WHITE;
 	const uint16_t fg = selected ? ST7735_WHITE : ST7735_BLACK;
+
 	lcd_fill_rect(0, y, LCD_WIDTH, MENU_ROW_HEIGHT - 1, bg);
 	lcd_draw_text3x5(MENU_TEXT_X, (uint8_t)(y + MENU_TEXT_Y_OFFSET), name, fg);
 }
@@ -288,10 +291,11 @@ static void init_lcd_scale_lut(void)
 	if (gb_to_lcd_line_ready)
 		return;
 
-	uint8_t prev_line = LCD_LINE_SKIP;
+	uint8_t prev_line = 0xFF;
 	for (uint8_t gb_line = 0; gb_line < GB_LCD_HEIGHT; gb_line++) {
 		const uint8_t lcd_line =
-			(uint8_t)(((uint16_t)gb_line * LCD_HEIGHT) / GB_LCD_HEIGHT);
+		(uint8_t)(((uint16_t)gb_line * LCD_HEIGHT) / GB_LCD_HEIGHT);
+
 		if (lcd_line == prev_line) {
 			gb_to_lcd_line[gb_line] = LCD_LINE_SKIP;
 		} else {
@@ -559,6 +563,7 @@ void rom_file_selector(void)
 static void core1_lcd_draw_line(const uint_fast8_t line)
 {
 	static uint16_t fb[LCD_WIDTH];
+
 	if (line >= LCD_HEIGHT) {
 		__atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
 		return;

@@ -35,3 +35,10 @@
 ### Insert SD Card into the slot on the back of the screen
 ### Start the sprig and if done correctly then you should have your games listed!
 
+# Build Instructions
+
+export PICO_SDK_PATH=~/pico-sdk
+cd build
+rm -rf *
+cmake ..
+make -j$(nproc)
