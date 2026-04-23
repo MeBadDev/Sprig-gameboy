@@ -638,14 +638,12 @@ int main(void)
 	static struct gb_s gb;
 	enum gb_init_error_e ret;
 
-	// Overclock to 266 MHz
+	// Lower, safer overclock for stability testing
 	{
-		// target: 286 MHz = 1716 / (6 * 1)
-		const unsigned vco  = 1716 * 1000 * 1000;
+		const unsigned vco  = 1500 * 1000 * 1000;
 		const unsigned div1 = 6, div2 = 1;
 
-		// A slight voltage bump is recommended for stability over 250MHz
-		vreg_set_voltage(VREG_VOLTAGE_1_20);
+		vreg_set_voltage(VREG_VOLTAGE_1_15);
 		sleep_ms(2);
 		set_sys_clock_pll(vco, div1, div2);
 		sleep_ms(2);
@@ -697,7 +695,7 @@ int main(void)
 	i2s_config.dma_trans_count  = AUDIO_SAMPLES;
 	i2s_config.data_pin         = 9;
 	i2s_config.clock_pin_base   = 10;
-	i2s_volume(&i2s_config, 2);
+	i2s_volume(&i2s_config, 1);
 	i2s_init(&i2s_config);
 	putstdio("AUDIO ");
 	#endif
