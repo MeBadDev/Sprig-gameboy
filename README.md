@@ -26,6 +26,7 @@ Simple Gameboy Emulator built for the [Hack Club Sprig](https://sprig.hackclub.c
 4. Format a SD Card to `FAT32` and put roms you own legally onto it in a .GB format
 5. Insert SD Card into the slot on the back of the screen
 6. Start the sprig
+
 If done correctly then you should have your games listed!
 
 # Build Instructions
